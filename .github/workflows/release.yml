@@ -1,0 +1,21 @@
+name: release
+
+on: 
+  push:
+    branches:
+      - "linux-aarch64"
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+    - name: Maven without tests (rely on upstream testing for now)
+      run: mvn clean install -DskipTests
+    - uses: ncipollo/release-action@v1
+      with:
+        artifacts: "esvee/target/*.jar,hmf-common/target/*.jar"
