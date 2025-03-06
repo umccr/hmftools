@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 This script does the following:
 - Whenever a user pushes a git tag in the format '<tool>-<version>' this script will parse that tag.

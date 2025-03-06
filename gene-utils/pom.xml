@@ -5,7 +5,7 @@
     <parent>
         <artifactId>hmftools</artifactId>
         <groupId>com.hartwig</groupId>
-        <version>local-SNAPSHOT</version>
+        <version>esvee-1.0.1</version>
     </parent>
 
     <artifactId>gene-utils</artifactId>
@@ -23,11 +23,10 @@
             <artifactId>jooq</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.broadinstitute</groupId>
+            <groupId>org.umccr.java</groupId>
             <artifactId>gatk-bwamem-jni</artifactId>
-            <version>1.0.5</version>
+            <version>1.1.1</version>
         </dependency>
-
         <dependency>
             <groupId>com.hartwig</groupId>
             <artifactId>hmf-common</artifactId>

@@ -5,7 +5,7 @@
     <groupId>com.hartwig</groupId>
     <artifactId>hmftools</artifactId>
     <packaging>pom</packaging>
-    <version>local-SNAPSHOT</version>
+    <version>esvee-1.0.1</version>
     <name>HMF Genomics Tools</name>
 
     <modules>
@@ -57,7 +57,7 @@
         <maven.site.plugin.version>3.7.1</maven.site.plugin.version>
         <maven.shade.plugin.version>3.2.4</maven.shade.plugin.version>
 
-        <hmf-common.version>local-SNAPSHOT</hmf-common.version>
+        <hmf-common.version>esvee-1.0.1</hmf-common.version>
 
         <amber.version>4.2</amber.version>
         <bam-tools.version>1.4</bam-tools.version>
@@ -68,7 +68,7 @@
         <compar.version>1.3</compar.version>
         <crest.version>1.0.0</crest.version>
         <cuppa.version>2.3</cuppa.version>
-        <esvee.version>1.1</esvee.version>
+        <esvee.version>1.0.1</esvee.version>
         <fastq-tools.version>1.0</fastq-tools.version>
         <gene-utils.version>1.2</gene-utils.version>
         <health-checker.version>3.6</health-checker.version>
