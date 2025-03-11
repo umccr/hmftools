@@ -5,12 +5,12 @@
     <parent>
         <artifactId>hmftools</artifactId>
         <groupId>com.hartwig</groupId>
-        <version>esvee-v1.0.2</version>
+        <version>esvee-1.0.2</version>
     </parent>
 
     <artifactId>esvee</artifactId>
     <packaging>jar</packaging>
-    <version>v1.0.2</version>
+    <version>1.0.2</version>
     <name>HMF Tools - Esvee</name>
 
     <dependencies>
