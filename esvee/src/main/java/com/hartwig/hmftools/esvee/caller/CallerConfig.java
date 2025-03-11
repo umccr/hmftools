@@ -12,8 +12,11 @@ import static com.hartwig.hmftools.common.utils.config.CommonConfig.TUMOR_DESC;
 import static com.hartwig.hmftools.common.utils.config.ConfigUtils.addLoggingOptions;
 import static com.hartwig.hmftools.common.utils.file.FileWriterUtils.OUTPUT_ID;
 import static com.hartwig.hmftools.common.utils.file.FileWriterUtils.addOutputOptions;
+import static com.hartwig.hmftools.common.utils.file.FileWriterUtils.checkAddDirSeparator;
 import static com.hartwig.hmftools.common.utils.file.FileWriterUtils.parseOutputDir;
 import static com.hartwig.hmftools.esvee.assembly.AssemblyConfig.SV_LOGGER;
+import static com.hartwig.hmftools.esvee.caller.annotation.PonCache.ARTEFACT_PON_BED_SGL_FILE;
+import static com.hartwig.hmftools.esvee.caller.annotation.PonCache.ARTEFACT_PON_BED_SV_FILE;
 import static com.hartwig.hmftools.esvee.common.FileCommon.DEPTH_VCF_SUFFIX;
 import static com.hartwig.hmftools.esvee.common.FileCommon.INPUT_VCF;
 import static com.hartwig.hmftools.esvee.common.FileCommon.INPUT_VCF_DESC;
@@ -45,7 +48,10 @@ public class CallerConfig
     public final List<String> SpecificChromosomes;
 
     public final int ManualRefDepth;
+    public final boolean WriteBreakendTsv;
+
     public static final String MANUAL_REF_DEPTH = "manual_ref_depth";
+    public static final String WRITE_BREAKEND_TSV = "write_breakend_tsv";
 
     public CallerConfig(final ConfigBuilder configBuilder)
     {
@@ -65,13 +71,14 @@ public class CallerConfig
             VcfFile = formEsveeInputFilename(OutputDir, fileSampleId, DEPTH_VCF_SUFFIX, OutputId);
         }
 
-        PrepDir = configBuilder.hasValue(PREP_DIR) ? configBuilder.getValue(PREP_DIR) : OutputDir;
+        PrepDir = configBuilder.hasValue(PREP_DIR) ? checkAddDirSeparator(configBuilder.getValue(PREP_DIR)) : OutputDir;
 
         RefGenVersion = RefGenomeVersion.from(configBuilder);
 
         SpecificChromosomes = loadSpecificChromsomes(configBuilder);
 
         ManualRefDepth = configBuilder.getInteger(MANUAL_REF_DEPTH);
+        WriteBreakendTsv = configBuilder.hasFlag(WRITE_BREAKEND_TSV);
     }
 
     public boolean hasTumor() { return TumorId != null; }
@@ -128,6 +135,12 @@ public class CallerConfig
         addSpecificChromosomesRegionsConfig(configBuilder);
 
         PonCache.addConfig(configBuilder);
+
+        configBuilder.addPath(ARTEFACT_PON_BED_SV_FILE, false, "Additional artefact SV PON file");
+        configBuilder.addPath(ARTEFACT_PON_BED_SGL_FILE, false, "Additional artefact SGL PON file");
+
+        configBuilder.addFlag(WRITE_BREAKEND_TSV, "Rewrite a breakend TSV for with additional caller annotations");
+
         HotspotCache.addConfig(configBuilder);
         FilterConstants.addConfig(configBuilder);
         RepeatMaskAnnotations.addConfig(configBuilder);

@@ -1,7 +1,13 @@
 package com.hartwig.hmftools.bamtools.checker;
 
+import static java.lang.Math.max;
+
+import static com.hartwig.hmftools.bamtools.checker.CheckConfig.LOG_READ_COUNT;
 import static com.hartwig.hmftools.bamtools.common.CommonUtils.BT_LOGGER;
 import static com.hartwig.hmftools.common.bam.SamRecordUtils.readToString;
+import static com.hartwig.hmftools.common.genome.chromosome.Chromosome.isAltRegionContig;
+
+import static org.apache.logging.log4j.Level.DEBUG;
 
 import java.util.List;
 import java.util.Map;
@@ -9,6 +15,8 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 import com.hartwig.hmftools.common.bam.BamSlicer;
 import com.hartwig.hmftools.common.region.ChrBaseRegion;
+
+import org.apache.logging.log4j.Level;
 
 import htsjdk.samtools.SAMFileWriter;
 import htsjdk.samtools.SAMRecord;
@@ -26,12 +34,12 @@ public class PartitionChecker
 
     private final Map<String,Fragment> mFragmentMap;
 
+    private final FragmentStats mCurrentStats;
+    private final FragmentStats mStats;
     private long mReadCount;
     private long mNextLogReadCount;
     private long mCompleteFragments;
     private final boolean mLogReadIds;
-
-    private static final int LOG_READ_COUNT = 10_000_000;
 
     public PartitionChecker(
             final CheckConfig config, final FragmentCache fragmentCache, final SamReader samReader, final SAMFileWriter bamWriter)
@@ -53,11 +61,17 @@ public class PartitionChecker
         mCompleteFragments = 0;
         mNextLogReadCount = LOG_READ_COUNT;
         mLogReadIds = !mConfig.LogReadIds.isEmpty();
+
+        mCurrentStats = new FragmentStats();
+        mStats = new FragmentStats();
     }
+
+    public FragmentStats stats() { return mStats; }
 
     public void processPartition(final ChrBaseRegion region)
     {
-        BT_LOGGER.debug("processing region({})", region);
+        Level loglevel = isAltRegionContig(region.Chromosome) ? Level.TRACE : DEBUG;
+        BT_LOGGER.log(loglevel, "processing region({})", region);
 
         mRegion = region;
 
@@ -66,11 +80,17 @@ public class PartitionChecker
         mNextLogReadCount = LOG_READ_COUNT;
         mFragmentMap.clear();
 
+        mCurrentStats.reset();
+
         mBamSlicer.slice(mSamReader, mRegion, this::processSamRecord);
 
         handleIncompleteFragments();
+        mStats.merge(mCurrentStats);
 
-        BT_LOGGER.debug("region({}) complete, reads({}) fragments(complete={} incomplete={})",
+        if(loglevel == Level.TRACE && mReadCount > 0)
+            loglevel = DEBUG;
+
+        BT_LOGGER.log(loglevel, "region({}) complete, reads({}) fragments(complete={} incomplete={})",
                 mRegion, mReadCount, mCompleteFragments, mFragmentMap.size());
 
         mFragmentMap.clear();
@@ -92,7 +112,7 @@ public class PartitionChecker
         {
             mNextLogReadCount += LOG_READ_COUNT;
 
-            BT_LOGGER.info("region({}) processed reads({}), cached fragments({})", mRegion, mReadCount, mFragmentMap.size());
+            BT_LOGGER.info("region({}) processed reads({}) cached fragments({})", mRegion, mReadCount, mFragmentMap.size());
         }
 
         if(!read.getReadPairedFlag() || read.isSecondaryAlignment())
@@ -113,6 +133,8 @@ public class PartitionChecker
         {
             fragment = new Fragment(read);
             mFragmentMap.put(read.getReadName(), fragment);
+
+            mCurrentStats.MaxFragmentCount = max(mCurrentStats.MaxFragmentCount, mFragmentMap.size());
         }
         else
         {
@@ -129,6 +151,11 @@ public class PartitionChecker
             {
                 mFragmentMap.remove(fragment.readId());
                 ++mCompleteFragments;
+
+                ++mCurrentStats.TotalFragments;
+
+                if(fragment.receivedSupplementaryCount() > 0)
+                    ++mCurrentStats.FragmentsWithSupplementaries;
             }
         }
     }

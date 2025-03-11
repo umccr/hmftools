@@ -51,6 +51,7 @@ public class CheckConfig
     public final String BamToolPath;
     public final boolean SkipUnmapped;
     public final boolean WriteIncompleteFragments;
+    public final boolean DropIncompleteFragments;
 
     // debug
     public final SpecificRegions SpecificChrRegions;
@@ -59,6 +60,10 @@ public class CheckConfig
 
     public static final String SKIP_UNMAPPED = "skip_unmapped";
     public static final String WRITE_INCOMPLETE_FRAGS = "write_incompletes";
+    public static final String DROP_INCOMPLETE_FRAGS = "drop_incompletes";
+    public static final String CFG_LOG_READ_COUNT = "log_read_count";
+
+    protected static int LOG_READ_COUNT = 10_000_000;
 
     public CheckConfig(final ConfigBuilder configBuilder)
     {
@@ -86,6 +91,9 @@ public class CheckConfig
         PerfDebug = configBuilder.hasFlag(PERF_DEBUG);
         SkipUnmapped = configBuilder.hasFlag(SKIP_UNMAPPED);
         WriteIncompleteFragments = configBuilder.hasFlag(WRITE_INCOMPLETE_FRAGS);
+        DropIncompleteFragments = configBuilder.hasFlag(DROP_INCOMPLETE_FRAGS);
+
+        LOG_READ_COUNT = configBuilder.getInteger(CFG_LOG_READ_COUNT);
     }
 
     public String formFilename(final String fileId, final String fileExtension)
@@ -116,9 +124,11 @@ public class CheckConfig
         addRefGenomeFile(configBuilder, true);;
 
         configBuilder.addInteger(PARTITION_SIZE, "Partition size", DEFAULT_CHR_PARTITION_SIZE);
+        configBuilder.addInteger(CFG_LOG_READ_COUNT, "Log partition processed read count frequency", LOG_READ_COUNT);
         configBuilder.addFlag(PERF_DEBUG, "Detailed performance tracking and logging");
         configBuilder.addFlag(SKIP_UNMAPPED, "Skip full unmapped reads");
         configBuilder.addFlag(WRITE_INCOMPLETE_FRAGS, "Write incomplete fragments to TSV");
+        configBuilder.addFlag(DROP_INCOMPLETE_FRAGS, "Drop incomplete fragments from BAM");
 
         BamToolName.addConfig(configBuilder);
         addThreadOptions(configBuilder);
@@ -126,23 +136,5 @@ public class CheckConfig
         addLoggingOptions(configBuilder);
         addSpecificChromosomesRegionsConfig(configBuilder);
         configBuilder.addConfigItem(LOG_READ_IDS, LOG_READ_IDS_DESC);
-    }
-
-    @VisibleForTesting
-    public CheckConfig()
-    {
-        BamFile = "";
-        RefGenomeFile = "";
-        RefGenVersion = V37;
-        OutputDir = "";
-        OutputId = "";
-        PartitionSize = DEFAULT_CHR_PARTITION_SIZE;
-        SpecificChrRegions = new SpecificRegions();
-        Threads = 0;
-        BamToolPath = null;
-        PerfDebug = false;
-        SkipUnmapped = false;
-        WriteIncompleteFragments = false;
-        LogReadIds = Collections.emptyList();
     }
 }
