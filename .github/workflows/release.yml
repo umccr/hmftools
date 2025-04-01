@@ -17,3 +17,31 @@ jobs:
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "esvee/target/*.jar,hmf-common/target/*.jar"
+
+  docker:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-22.04-arm]
+    needs: build
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      with:
+        platforms: linux/amd64,linux/arm64
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Docker GitHub release
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        provenance: false
+        file: Dockerfile
+        platforms: ${{ matrix.platforms }}
+        push: true
+        tags: ghcr.io/umccr/hmftools-esvee:aarch64
