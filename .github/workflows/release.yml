@@ -44,4 +44,4 @@ jobs:
         file: ./esvee/Dockerfile
         platforms: ${{ matrix.platforms }}
         push: true
-        tags: ghcr.io/umccr/hmftools-esvee:aarch64
+        tags: ghcr.io/umccr/hmftools-esvee:1.0.2-aarch64
