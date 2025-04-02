@@ -8,7 +8,8 @@ ARG RUN_SCRIPT=/usr/local/bin/${TOOL_NAME}
 USER root
 
 ADD target/${TOOL_NAME}-${VERSION}-jar-with-dependencies.jar ${JAR}
-ADD entrypoint.sh ${RUN_SCRIPT}
+#ADD entrypoint.sh ${RUN_SCRIPT}
+ADD ./esvee/entrypoint.sh ${RUN_SCRIPT}
 RUN chmod +x ${RUN_SCRIPT}
 
 RUN micromamba install -y -n base -c bioconda -c conda-forge \

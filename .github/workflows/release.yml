@@ -36,6 +36,13 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+#    - name: Get git tag tool and version
+#      run: |
+#        TAG=${GITHUB_REF#refs/tags/}
+#        TOOL=${TAG%-*}
+#        VERSION=${TAG#*-}
+#        echo "TOOL=$TOOL" >> $GITHUB_ENV
+#        echo "VERSION=$VERSION" >> $GITHUB_ENV
     - name: Docker GitHub release
       uses: docker/build-push-action@v6
       with:
@@ -43,5 +50,8 @@ jobs:
         provenance: false
         file: ./esvee/Dockerfile
         platforms: ${{ matrix.platforms }}
+#        build-args: VERSION=$VERSION
+        build-args: VERSION=1.0.2
         push: true
+#        tags: ghcr.io/umccr/hmftools-$TOOL:$VERSION-aarch64
         tags: ghcr.io/umccr/hmftools-esvee:1.0.2-aarch64
