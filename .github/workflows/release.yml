@@ -26,6 +26,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'corretto'
     - name: Maven without tests (rely on upstream testing for now)
       run: mvn clean install -DskipTests
     - name: Set up Docker Buildx
